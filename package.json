@@ -1,0 +1,21 @@
+{
+  "name": "rust-js-bindings",
+  "version": "0.1.0",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "scripts": {
+    "build": "napi build --platform --release",
+    "build:debug": "napi build --platform",
+    "prepublishOnly": "napi prepublish -t npm"
+  },
+  "devDependencies": {
+    "@napi-rs/cli": "^3.7.2"
+  },
+  "napi": {
+    "name": "rust-js-bindings",
+    "triples": {
+      "defaults": true
+    }
+  },
+  "license": "MIT"
+}
