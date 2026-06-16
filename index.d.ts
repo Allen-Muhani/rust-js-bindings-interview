@@ -4,7 +4,7 @@ export declare class Request {
   constructor(method: string, path: string)
   method: string
   path: string
-  params: Record<string, string>
+  get params(): Record<string, string>
 }
 
 export declare class Response {
@@ -30,23 +30,18 @@ export type IRouterPartial = {
  * const app = new Application()
  *
  * // Overload 1 — typed route string + normal handler
- * typed route string + RequestHandler[]
  * app.get('/users/:id', (req, res, next) => { ... })
  *
  * // Overload 2 — typed route string + error handler in chain
- * typed route string + RequestHandlerParams[] (includes error handlers)
  * app.get('/users/:id', handler, (err, req, res, next) => { ... })
  *
  * // Overload 3 — array of paths + normal handler
- * PathParams (string | RegExp | Array) + RequestHandler[]
  * app.get(['/users', '/people'], (req, res, next) => { ... })
  *
  * // Overload 4 — array of paths + error handler in chain
- * PathParams + RequestHandlerParams[]
  * app.get(['/users', '/people'], handler, (err, req, res, next) => { ... })
  *
  * // Overload 5 — mount a sub-application
- * PathParams + sub-Application (for mounting nested apps)
  * app.get('/users', new Application())
  */
 export declare class Application implements IRouterPartial {
