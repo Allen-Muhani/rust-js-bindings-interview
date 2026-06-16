@@ -1,5 +1,19 @@
 import type { IRouterMatcher } from 'express-serve-static-core'
 
+export declare class Request {
+  constructor(method: string, path: string)
+  method: string
+  path: string
+  params: Record<string, string>
+}
+
+export declare class Response {
+  constructor()
+  statusCode: number
+  status(code: number): this
+  send(body: string): void
+}
+
 /**
  * Minimal interface requiring only the GET method from Express's router.
  * IRouterMatcher<IRouterPartial, 'get'> expands to 5 overloaded call signatures,
