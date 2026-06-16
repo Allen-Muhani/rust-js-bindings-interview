@@ -5,7 +5,7 @@ import type { IRouterMatcher } from 'express-serve-static-core'
  * IRouterMatcher<IRouterPartial, 'get'> expands to 5 overloaded call signatures,
  * each returning IRouterPartial to allow chaining.
  */
-type IRouterPartial = {
+export type IRouterPartial = {
   get: IRouterMatcher<IRouterPartial, 'get'>
 }
 
@@ -35,7 +35,7 @@ type IRouterPartial = {
  * PathParams + sub-Application (for mounting nested apps)
  * app.get('/users', new Application())
  */
-export declare class Application {
+export declare class Application implements IRouterPartial {
   constructor()
 
   /**

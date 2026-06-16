@@ -1,7 +1,6 @@
 #![deny(clippy::all)]
 
 use napi::bindgen_prelude::*;
-use napi::JsFunction;
 use napi_derive::napi;
 
 // Stub types — exist only to satisfy the type signatures of the get overloads.
@@ -27,7 +26,7 @@ impl Application {
   // Overload 1 — typed route string + one or more normal RequestHandlers.
   // e.g. app.get('/users/:id', (req, res, next) => { ... })
   #[napi]
-  pub fn get_with_handler(&self, _path: String, _handlers: Vec<JsFunction>) -> &Self {
+  pub fn get_with_handler(&self, _path: String, _handlers: Vec<Function<'_>>) -> &Self {
     self
   }
 
@@ -36,35 +35,34 @@ impl Application {
   // Rust can't distinguish handler arity at runtime so we accept all as JsFunction
   // and rely on the TypeScript layer to enforce the correct signatures.
   #[napi]
-  pub fn get_with_mixed_handlers(&self, _path: String, _handlers: Vec<JsFunction>) -> &Self {
+  pub fn get_with_mixed_handlers(&self, _path: String, _handlers: Vec<Function<'_>>) -> &Self {
     self
   }
 
-  // Overload 3 — PathParams (string | RegExp | Array<string | RegExp>) + normal handlers.
+  // Overload 3 — PathParams array + normal handlers.
   // e.g. app.get(['/users', '/people'], handler)
-  // PathParams is represented as a JS unknown value since it can be a string,
-  // RegExp object, or array — we let the JS side pass it through untyped.
+  // The JS bridge only calls this when Array.isArray(path) is true.
   #[napi]
-  pub fn get_with_path_params(&self, _path: Unknown, _handlers: Vec<JsFunction>) -> &Self {
+  pub fn get_with_path_params(&self, _path: Vec<String>, _handlers: Vec<Function<'_>>) -> &Self {
     self
   }
 
-  // Overload 4 — PathParams + mixed RequestHandler / ErrorRequestHandler.
+  // Overload 4 — PathParams array + mixed RequestHandler / ErrorRequestHandler.
   // e.g. app.get(['/users', '/people'], normalHandler, errorHandler)
   #[napi]
   pub fn get_with_path_params_mixed(
     &self,
-    _path: Unknown,
-    _handlers: Vec<JsFunction>,
+    _path: Vec<String>,
+    _handlers: Vec<Function<'_>>,
   ) -> &Self {
     self
   }
 
-  // Overload 5 — PathParams + a sub-application (another Application instance).
+  // Overload 5 — string path + a sub-application (another Application instance).
   // e.g. app.get('/users', usersApp)
-  // Used to mount a nested Application at a given path.
+  // The JS bridge always calls String(path) before passing here.
   #[napi]
-  pub fn get_with_sub_app(&self, _path: Unknown, _sub_app: &Application) -> &Self {
+  pub fn get_with_sub_app(&self, _path: String, _sub_app: &Application) -> &Self {
     self
   }
 }
