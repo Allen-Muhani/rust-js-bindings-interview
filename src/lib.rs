@@ -73,39 +73,17 @@ impl Application {
 
   // Overload 2 — typed route string + mixed RequestHandler / ErrorRequestHandler.
   // e.g. app.get('/users/:id', normalHandler, errorHandler)
-  // Handlers arrive opaque because a Vec can't hold two different concrete function
-  // types. We probe .length at runtime to tell them apart, then reinterpret the raw
-  // napi value as the correct typed Function before invocation.
+  // The JS bridge pre-classifies handlers by arity before crossing the NAPI boundary,
+  // so each vec arrives with a concrete typed signature — no runtime probing needed.
   #[napi]
   pub fn get_with_mixed_handlers(
     &self,
     _path: String,
-    handlers: Vec<Function<'_>>,
-  ) -> napi::Result<&Self> {
-    for handler in &handlers {
-      let arity: f64 = handler.get_named_property("length")?;
-      let v = handler.value();
-      if arity as u32 == 4 {
-        // Error handler: (err, req, res, next) => void
-        // err is Unknown<'_> because Express makes no guarantee about its shape —
-        // callers may pass a JS Error object, a plain string, a number, or null.
-        let _typed: Function<
-          '_,
-          FnArgs<(Unknown<'_>, ClassInstance<Request>, ClassInstance<Response>, Function<'_>)>,
-          (),
-        > = unsafe { Function::from_napi_value(v.env, v.value) }?;
-        // _typed.call((err, req, res, next))? — once those values are in scope
-      } else {
-        // Normal handler: (req, res, next) => void
-        let _typed: Function<
-          '_,
-          FnArgs<(ClassInstance<Request>, ClassInstance<Response>, Function<'_>)>,
-          (),
-        > = unsafe { Function::from_napi_value(v.env, v.value) }?;
-        // _typed.call((req, res, next))? — once those values are in scope
-      }
-    }
-    Ok(self)
+    _normal_handlers: Vec<Function<'_, FnArgs<(ClassInstance<Request>, ClassInstance<Response>, Function<'_>)>, ()>>,
+    _error_handlers: Vec<Function<'_, FnArgs<(Unknown<'_>, ClassInstance<Request>, ClassInstance<Response>, Function<'_>)>, ()>>,
+    _order: Vec<bool>,
+  ) -> &Self {
+    self
   }
 
   // Overload 3 — PathParams array + normal handlers.
@@ -122,32 +100,16 @@ impl Application {
 
   // Overload 4 — PathParams array + mixed RequestHandler / ErrorRequestHandler.
   // e.g. app.get(['/users', '/people'], normalHandler, errorHandler)
-  // Same arity-probe dispatch as overload 2 — see get_with_mixed_handlers.
+  // Same pre-classified pattern as overload 2 — see get_with_mixed_handlers.
   #[napi]
   pub fn get_with_path_params_mixed(
     &self,
     _path: Vec<String>,
-    handlers: Vec<Function<'_>>,
-  ) -> napi::Result<&Self> {
-    for handler in &handlers {
-      let arity: f64 = handler.get_named_property("length")?;
-      let v = handler.value();
-      if arity as u32 == 4 {
-        // err is Unknown<'_> — see get_with_mixed_handlers for the full reasoning.
-        let _typed: Function<
-          '_,
-          FnArgs<(Unknown<'_>, ClassInstance<Request>, ClassInstance<Response>, Function<'_>)>,
-          (),
-        > = unsafe { Function::from_napi_value(v.env, v.value) }?;
-      } else {
-        let _typed: Function<
-          '_,
-          FnArgs<(ClassInstance<Request>, ClassInstance<Response>, Function<'_>)>,
-          (),
-        > = unsafe { Function::from_napi_value(v.env, v.value) }?;
-      }
-    }
-    Ok(self)
+    _normal_handlers: Vec<Function<'_, FnArgs<(ClassInstance<Request>, ClassInstance<Response>, Function<'_>)>, ()>>,
+    _error_handlers: Vec<Function<'_, FnArgs<(Unknown<'_>, ClassInstance<Request>, ClassInstance<Response>, Function<'_>)>, ()>>,
+    _order: Vec<bool>,
+  ) -> &Self {
+    self
   }
 
   // Overload 5 — string path + a sub-application (another Application instance).

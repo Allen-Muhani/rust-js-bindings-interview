@@ -1,3 +1,11 @@
 target/
 node_modules/
 *.node
+
+# tsc outputs — generated from index.ts, do not edit directly
+index.js
+index.d.ts
+
+# napi-rs outputs — generated from src/lib.rs, do not edit directly
+_binding.js
+_binding.d.ts

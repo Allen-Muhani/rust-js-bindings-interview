@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "CommonJS",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "outDir": ".",
+    "rootDir": ".",
+    "declaration": true
+  },
+  "include": ["index.ts"],
+  "exclude": ["node_modules", "target"]
+}

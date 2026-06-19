@@ -1,4 +1,4 @@
-const { Application, Request, Response } = require('./index.js')
+const { createApp, Request, Response } = require('./index.js')
 
 let passed = 0
 let failed = 0
@@ -33,8 +33,8 @@ assert('send() does not throw',  (() => { try { res.send('hello'); return true }
 
 // ─── Application ────────────────────────────────────────────────────────────
 console.log('\nApplication — overload dispatch')
-const app = new Application()
-assert('instantiates', app instanceof Application)
+const app = createApp()
+assert('has get method', typeof app.get === 'function')
 
 // Overload 1 — string path + normal handler
 assert('overload 1 does not throw', (() => {
@@ -58,7 +58,7 @@ assert('overload 4 does not throw', (() => {
 
 // Overload 5 — sub-application mounting
 assert('overload 5 does not throw', (() => {
-  try { app.get('/users', new Application()); return true } catch { return false }
+  try { app.get('/users', createApp()); return true } catch { return false }
 })())
 
 // Chaining
